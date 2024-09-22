@@ -14,6 +14,7 @@ typedef enum{
     IDENTIFICADOR,
     NUMERO,
     PALAVRA_RESERVADA,
+    COMENTARIO,
     EOS
 }TAtomo;
 
@@ -28,18 +29,24 @@ char *msgAtomo[] = {
     "ERRO",
     "IDENTIFICADOR",
     "NUMERO",
-    "PALAVRA_RESERVADA",
+    "PALAVRA_RESERVADA"
     "EOS"
 };
 // variavel global para o analisador lexico
 // variavel bufer devera ser inicializada a partir de um arquivo texto
 char *buffer = "     var_1aaaaaaaaaa\n"
-               " \r var2aaaaaaaaaaaa\t \n\n\n\n"
-               " vaa3  boolean elif";
+               " \r var2aaaaaaaaaa\t \n"
+               " vaa3  boolean elif"
+               "{- isso é um teste-}\n"
+               "#teste\n"
+               "teste\n"
+               "# teste\n"
+               "{-teste-}\n"
+               "passou\n";
 
 int contaLinha = 1;
 char *palavrasReservadas[] = {
-    "and", "begin", "boolean", "elif", "end", "false", "for", "if", "integer", "not", "of", "or", "program", "read", "set", "to", "true", "write", NULL
+    "and", "begin", "boolean", "elif", "end", "false", "for", "if", "integer", "not", "of", "or", "program", "read", "set", "to", "true", "write"
 };
 
 // declaracao da funcao
@@ -52,7 +59,9 @@ int main ()
     TInfoAtomo info_atomo;
     do{
         info_atomo = obter_atomo();
-        if( info_atomo.atomo == IDENTIFICADOR)
+        if (info_atomo.atomo == COMENTARIO)
+            continue;
+        else if( info_atomo.atomo == IDENTIFICADOR)
             printf("#   %d %s | %s\n",info_atomo.linha,msgAtomo[info_atomo.atomo], info_atomo.atributo_ID);
         else if( info_atomo.atomo == NUMERO)
             printf("#   %d %s | %f\n",info_atomo.linha,msgAtomo[info_atomo.atomo], info_atomo.atributo_numero);
@@ -65,6 +74,7 @@ int main ()
     printf("fim da analise lexica\n");
     return 0;
 }
+
 TInfoAtomo obter_atomo(){
     TInfoAtomo info_atomo;
 
@@ -78,7 +88,22 @@ TInfoAtomo obter_atomo(){
     if( islower(*buffer)){ // ser for letra mininuscula
         info_atomo = reconhece_id();
     }else if (strncmp(buffer, "0b", 2) == 0) { // Checa se começa com '0b' para número binário
-        info_atomo = reconhece_num();
+        info_atomo = reconhece_num(); // reconhece numero
+    }else if(strncmp(buffer, "{-", 2) == 0){
+        buffer += 2;
+        while (strncmp(buffer, "-}", 2) != 0 && *buffer != 0) {
+            if (*buffer == '\n') {
+                contaLinha++;
+            }
+            buffer++;
+        }
+        if (*buffer != 0) buffer += 2;  // Avança além do "-}"
+        info_atomo.atomo = COMENTARIO;
+    }else if(*buffer == '#'){
+        while (*buffer != '\n' && *buffer !=0) {
+            buffer++;
+        }
+        info_atomo.atomo = COMENTARIO;
     }else if(*buffer == 0){
         info_atomo.atomo = EOS;
     }else{
@@ -127,7 +152,7 @@ q1:
 
 
 
-
+// NUM BINARIO
 TInfoAtomo reconhece_num(){
     TInfoAtomo info_atomo;
     info_atomo.atomo = ERRO;
