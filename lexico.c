@@ -15,7 +15,24 @@
 typedef enum {
     ERRO,
     IDENTIFICADOR,
-    PALAVRA_RESERVADA,
+    AND,
+    BEGIN,
+    BOOLEAN,
+    ELIF,
+    END,
+    FALSE,
+    FOR,
+    IF,
+    INTEGER,
+    NOT,
+    OF,
+    OR,
+    PROGRAM,
+    READ,
+    SET,
+    TO,
+    TRUE,
+    WRITE,
     NUMERO,
     COMENTARIO,
     EOS
@@ -31,7 +48,24 @@ typedef struct {
 char* msgAtomo[] = {
     "ERRO",
     "IDENTIFICADOR",
-    "PALAVRA RESERVADA",
+    "AND",
+    "BEGIN",
+    "BOOLEAN",
+    "ELIF",
+    "END",
+    "FALSE",
+    "FOR",
+    "IF",
+    "INTEGER",
+    "NOT",
+    "OF",
+    "OR",
+    "PROGRAM",
+    "READ",
+    "SET",
+    "TO",
+    "TRUE",
+    "WRITE",
     "NUMERO",
     "COMENTARIO",
     "EOS"
@@ -65,8 +99,11 @@ int main(int argc, char* argv[]) {
     {
         info_atomo = get_atomo();
 
-        if(info_atomo.atomo == IDENTIFICADOR || info_atomo.atomo == PALAVRA_RESERVADA)
+        if(info_atomo.atomo == IDENTIFICADOR)
             printf("%03d# %s | %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_ID);
+
+        if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == NUMERO)
             printf("%03d# %s | %d\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_numero);
@@ -164,9 +201,11 @@ TInfoAtomo get_identificador() {
     info_identificador.atributo_ID[buffer - iniID] = 0; // Finaliza a string
     info_identificador.atomo = IDENTIFICADOR;
 
+    // Verifica se é uma palavra reservada
     for(int i = 0; palavras_reservadas[i] != NULL; i++) {
         if(strcmp(info_identificador.atributo_ID, palavras_reservadas[i]) == 0) {
-            info_identificador.atomo = PALAVRA_RESERVADA;
+            // Palavra reservada correspondente: AND + índice no vetor de reservadas
+            info_identificador.atomo = AND + i;
         }
     }
 

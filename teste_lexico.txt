@@ -1,6 +1,10 @@
+program
 batata frita # reconhece ambos
 0b11 # reconhece
 # teste
+and begin boolean elif end false for if integer 
+not of or program read set
+to true write
 {-
 comentario de multiplas linhas
 -}
@@ -8,3 +12,4 @@ comentario de multiplas linhas
 0b1100{-a linguagem C reconhece int numero = 99/**/; -} 
 0b101_ # NAO reconhece, pois _ esta tentando compor numero
 0b101abc # NAO reconhece, pois abc esta tentando compor numero
+end
