@@ -46,6 +46,7 @@ typedef enum {
     MULTIPLICACAO,
     DIVISAO,
     IGUAL,
+    DIFERENTE,
     MENOR,
     MAIOR,
     EOS
@@ -92,6 +93,7 @@ char* msgAtomo[] = {
     "MULTIPLICACAO",
     "DIVISAO",
     "IGUAL",
+    "DIFERENTE",
     "MENOR",
     "MAIOR",
     "EOS"
@@ -118,6 +120,7 @@ TInfoAtomo get_adicao();
 TInfoAtomo get_virgula();
 TInfoAtomo get_divisao();
 TInfoAtomo get_subtracao();
+TInfoAtomo get_diferente();
 TInfoAtomo get_comentarioA();
 TInfoAtomo get_comentarioB();
 TInfoAtomo get_dois_pontos();
@@ -172,6 +175,9 @@ int main(int argc, char* argv[]) {
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == IGUAL)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == DIFERENTE)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == MENOR)
@@ -276,8 +282,12 @@ TInfoAtomo get_atomo() {
     // Se identificar '*', átomo esperado é multiplicação
     else if(*buffer == '*') info_atomo = get_multiplicacao();
     
-    // Se identificar '/', átomo esperado é divisão
-    else if(*buffer == '/') info_atomo = get_divisao();
+    // Se identificar '/', átomo pode ser divisão ou diferente
+    else if(*buffer == '/') {
+        // Se próximo caractere do buffer for '=', teremos '/='
+        if(*(buffer + 1) == '=') info_atomo = get_diferente();
+        else info_atomo = get_divisao(); // Do contrário, teremos '/'
+    }
     
     // Se identificar '=', átomo esperado é igual
     else if(*buffer == '=') info_atomo = get_igual();
@@ -504,6 +514,13 @@ TInfoAtomo get_igual() {
     info_igual.atomo = IGUAL;
     buffer++; // Consome igual
     return info_igual;
+}
+
+TInfoAtomo get_diferente() {
+    TInfoAtomo info_diferente;
+    info_diferente.atomo = DIFERENTE;
+    buffer++; buffer++; // Consome '/' e '=';
+    return info_diferente;
 }
 
 TInfoAtomo get_menor() {
