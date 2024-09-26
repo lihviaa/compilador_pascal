@@ -48,7 +48,9 @@ typedef enum {
     IGUAL,
     DIFERENTE,
     MENOR,
+    MENOR_OU_IGUAL,
     MAIOR,
+    MAIOR_OU_IGUAL,
     EOS
 } TAtomo;
 
@@ -95,7 +97,9 @@ char* msgAtomo[] = {
     "IGUAL",
     "DIFERENTE",
     "MENOR",
+    "MENOR OU IGUAL",
     "MAIOR",
+    "MAIOR OU IGUAL",
     "EOS"
 };
 
@@ -126,6 +130,8 @@ TInfoAtomo get_comentarioB();
 TInfoAtomo get_dois_pontos();
 TInfoAtomo get_identificador();
 TInfoAtomo get_multiplicacao();
+TInfoAtomo get_menor_ou_igual();
+TInfoAtomo get_maior_ou_igual();
 TInfoAtomo get_ponto_e_virgula();
 TInfoAtomo get_abre_parenteses();
 TInfoAtomo get_fecha_parenteses();
@@ -183,7 +189,13 @@ int main(int argc, char* argv[]) {
         else if(info_atomo.atomo == MENOR)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
+        else if(info_atomo.atomo == MENOR_OU_IGUAL)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
         else if(info_atomo.atomo == MAIOR)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == MAIOR_OU_IGUAL)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
@@ -292,11 +304,19 @@ TInfoAtomo get_atomo() {
     // Se identificar '=', átomo esperado é igual
     else if(*buffer == '=') info_atomo = get_igual();
     
-    // Se identificar '<', átomo esperado é menor
-    else if(*buffer == '<') info_atomo = get_menor();
+    // Se identificar '<', átomo pode ser menor ou menor ou igual
+    else if(*buffer == '<') {
+        // Se próximo caractere do buffer for '=', teremos '<='
+        if(*(buffer + 1) == '=') info_atomo = get_menor_ou_igual();
+        else info_atomo = get_menor(); // Do contrário, teremos '<'
+    }
     
-    // Se identificar '>', átomo esperado é maior
-    else if(*buffer == '>') info_atomo = get_maior();
+    // Se identificar '>', átomo pode ser maior ou maior ou igual
+    else if(*buffer == '>') {
+        // Se próximo caractere do buffer for '=', teremos '>='
+        if(*(buffer + 1) == '=') info_atomo = get_maior_ou_igual();
+        else info_atomo = get_maior(); // Do contrário, teremos '>'
+    }
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -530,9 +550,23 @@ TInfoAtomo get_menor() {
     return info_menor;
 }
 
+TInfoAtomo get_menor_ou_igual() {
+    TInfoAtomo info_menor_ou_igual;
+    info_menor_ou_igual.atomo = MENOR_OU_IGUAL;
+    buffer++; buffer++; // Consome '<' e '='
+    return info_menor_ou_igual;
+}
+
 TInfoAtomo get_maior() {
     TInfoAtomo info_maior;
     info_maior.atomo = MAIOR;
     buffer++; // Consome maior
     return info_maior;
+}
+
+TInfoAtomo get_maior_ou_igual() {
+    TInfoAtomo info_maior_ou_igual;
+    info_maior_ou_igual.atomo = MAIOR_OU_IGUAL;
+    buffer++; buffer++;// Consome '>' e '='
+    return info_maior_ou_igual;
 }

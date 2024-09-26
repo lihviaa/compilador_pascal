@@ -1,7 +1,7 @@
 program
 batata frita # reconhece ambos 
 0b11 # reconhece
-# testando terminais ;.,:()+-*/=<>
+# testando terminais ; . , : ( ) + - * / = < > /= <= >=
 batata/oi
 batata+oi
 batata-oi
@@ -10,7 +10,7 @@ batata=oi
 0b11=0b11
 0b11>0b10
 0b11/0b10
-;,.:()+-*/=<>/
+; , . : ( ) + - * / = < > /= <= >=
 +++++
 =====
 /=/=/=
@@ -25,6 +25,10 @@ batata=oi
 # teste
 .....
 ;;;;;
+a>b
+a<b
+a>=b
+a<=b
 and begin boolean elif end false for if integer 
 not of or program read set;
 to true write
