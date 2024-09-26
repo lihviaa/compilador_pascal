@@ -1,11 +1,14 @@
 program
-batata frita # reconhece ambos ;.,:
+batata frita # reconhece ambos 
 0b11 # reconhece
-;,.:
+# testando terminais ;.,:()
+;,.:()
 ,,,,,
+((()))
 :::::
 # teste
 .....
+;;;;;
 and begin boolean elif end false for if integer 
 not of or program read set;
 to true write

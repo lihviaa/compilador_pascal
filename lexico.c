@@ -39,6 +39,8 @@ typedef enum {
     PONTO,
     VIRGULA,
     DOIS_PONTOS,
+    ABRE_PARENTESES,
+    FECHA_PARENTESES,
     EOS
 } TAtomo;
 
@@ -76,6 +78,8 @@ char* msgAtomo[] = {
     "PONTO",
     "VIRGULA",
     "DOIS PONTOS",
+    "ABRE PARENTESES",
+    "FECHA PARENTESES",
     "EOS"
 };
 
@@ -99,6 +103,8 @@ TInfoAtomo get_comentarioB();
 TInfoAtomo get_dois_pontos();
 TInfoAtomo get_identificador();
 TInfoAtomo get_ponto_e_virgula();
+TInfoAtomo get_abre_parenteses();
+TInfoAtomo get_fecha_parenteses();
 
 // Declaração de função de leitura de arquivo para buffer
 void file_to_buffer(char* file_name);
@@ -124,6 +130,12 @@ int main(int argc, char* argv[]) {
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == DOIS_PONTOS)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == ABRE_PARENTESES)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == FECHA_PARENTESES)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
@@ -206,6 +218,12 @@ TInfoAtomo get_atomo() {
     
     // Se identificar ':', átomo esperado é dois pontos
     else if(*buffer == ':') info_atomo = get_dois_pontos();
+    
+    // Se identificar '(', átomo esperado é abre parenteses
+    else if(*buffer == '(') info_atomo = get_abre_parenteses();
+    
+    // Se identificar ')', átomo esperado é fecha parenteses
+    else if(*buffer == ')') info_atomo = get_fecha_parenteses();
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -374,4 +392,18 @@ TInfoAtomo get_dois_pontos() {
     info_dois_pontos.atomo = DOIS_PONTOS;
     buffer++; // Consome dois pontos
     return info_dois_pontos;
+}
+
+TInfoAtomo get_abre_parenteses() {
+    TInfoAtomo info_abre_parenteses;
+    info_abre_parenteses.atomo = ABRE_PARENTESES;
+    buffer++; // Consome abre parenteses
+    return info_abre_parenteses;
+}
+
+TInfoAtomo get_fecha_parenteses() {
+    TInfoAtomo info_fecha_parenteses;
+    info_fecha_parenteses.atomo = FECHA_PARENTESES;
+    buffer++; // Consome fecha parenteses
+    return info_fecha_parenteses;
 }
