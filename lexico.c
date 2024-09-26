@@ -41,6 +41,10 @@ typedef enum {
     DOIS_PONTOS,
     ABRE_PARENTESES,
     FECHA_PARENTESES,
+    ADICAO,
+    SUBTRACAO,
+    MULTIPLICACAO,
+    DIVISAO,
     EOS
 } TAtomo;
 
@@ -80,6 +84,10 @@ char* msgAtomo[] = {
     "DOIS PONTOS",
     "ABRE PARENTESES",
     "FECHA PARENTESES",
+    "ADICAO",
+    "SUBTRACAO",
+    "MULTIPLICACAO",
+    "DIVISAO",
     "EOS"
 };
 
@@ -97,11 +105,15 @@ int conta_linha = 1;
 TInfoAtomo get_atomo();
 TInfoAtomo get_ponto();
 TInfoAtomo get_numero();
+TInfoAtomo get_adicao();
 TInfoAtomo get_virgula();
+TInfoAtomo get_divisao();
+TInfoAtomo get_subtracao();
 TInfoAtomo get_comentarioA();
 TInfoAtomo get_comentarioB();
 TInfoAtomo get_dois_pontos();
 TInfoAtomo get_identificador();
+TInfoAtomo get_multiplicacao();
 TInfoAtomo get_ponto_e_virgula();
 TInfoAtomo get_abre_parenteses();
 TInfoAtomo get_fecha_parenteses();
@@ -136,6 +148,18 @@ int main(int argc, char* argv[]) {
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == FECHA_PARENTESES)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == ADICAO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == SUBTRACAO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == MULTIPLICACAO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == DIVISAO)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
@@ -224,6 +248,18 @@ TInfoAtomo get_atomo() {
     
     // Se identificar ')', átomo esperado é fecha parenteses
     else if(*buffer == ')') info_atomo = get_fecha_parenteses();
+    
+    // Se identificar '+', átomo esperado é adição
+    else if(*buffer == '+') info_atomo = get_adicao();
+    
+    // Se identificar '-', átomo esperado é subtração
+    else if(*buffer == '-') info_atomo = get_subtracao();
+    
+    // Se identificar '*', átomo esperado é multiplicação
+    else if(*buffer == '*') info_atomo = get_multiplicacao();
+    
+    // Se identificar '/', átomo esperado é divisão
+    else if(*buffer == '/') info_atomo = get_divisao();
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -406,4 +442,32 @@ TInfoAtomo get_fecha_parenteses() {
     info_fecha_parenteses.atomo = FECHA_PARENTESES;
     buffer++; // Consome fecha parenteses
     return info_fecha_parenteses;
+}
+
+TInfoAtomo get_adicao() {
+    TInfoAtomo info_adicao;
+    info_adicao.atomo = ADICAO;
+    buffer++; // Consome adicao
+    return info_adicao;
+}
+
+TInfoAtomo get_subtracao() {
+    TInfoAtomo info_subtracao;
+    info_subtracao.atomo = SUBTRACAO;
+    buffer++; // Consome subtracao
+    return info_subtracao;
+}
+
+TInfoAtomo get_multiplicacao() {
+    TInfoAtomo info_multiplicacao;
+    info_multiplicacao.atomo = MULTIPLICACAO;
+    buffer++; // Consome multiplicacao
+    return info_multiplicacao;
+}
+
+TInfoAtomo get_divisao() {
+    TInfoAtomo info_divisao;
+    info_divisao.atomo = DIVISAO;
+    buffer++; // Consome divisao
+    return info_divisao;
 }
