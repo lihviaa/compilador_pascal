@@ -35,6 +35,8 @@ typedef enum {
     WRITE,
     NUMERO,
     COMENTARIO,
+    PONTO_E_VIRGULA,
+    PONTO,
     EOS
 } TAtomo;
 
@@ -68,6 +70,8 @@ char* msgAtomo[] = {
     "WRITE",
     "NUMERO",
     "COMENTARIO",
+    "PONTO E VIRGULA",
+    "PONTO",
     "EOS"
 };
 
@@ -87,6 +91,8 @@ TInfoAtomo get_numero();
 TInfoAtomo get_comentarioA();
 TInfoAtomo get_comentarioB();
 TInfoAtomo get_identificador();
+TInfoAtomo get_ponto_e_virgula();
+TInfoAtomo get_ponto();
 
 // Declaração de função de leitura de arquivo para buffer
 void file_to_buffer(char* file_name);
@@ -102,7 +108,13 @@ int main(int argc, char* argv[]) {
         if(info_atomo.atomo == IDENTIFICADOR)
             printf("%03d# %s | %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_ID);
 
-        if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
+        else if(info_atomo.atomo == PONTO_E_VIRGULA)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+        
+        else if(info_atomo.atomo == PONTO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == NUMERO)
@@ -162,14 +174,20 @@ TInfoAtomo get_atomo() {
     // Se identificar uma letra minúscula, átomo esperado é identificador
     if(islower(*buffer)) info_atomo = get_identificador();
     
-    // Se identificar 0, átomo esperado é um número no formato 0b(0|1)+
+    // Se identificar '0', átomo esperado é um número no formato 0b(0|1)+
     else if(*buffer == '0') info_atomo = get_numero();
 
-    // Se identificar #, átomo esperado é um comentário de uma linha
+    // Se identificar '#', átomo esperado é um comentário de uma linha
     else if(*buffer == '#') info_atomo = get_comentarioA();
 
-    // Se identificar {, átomo esperado é um comentário de múltiplas linhas
+    // Se identificar '{', átomo esperado é um comentário de múltiplas linhas
     else if(*buffer == '{') info_atomo = get_comentarioB();
+
+    // Se identificar ';', átomo esperado é ponto e vírgula
+    else if(*buffer == ';') info_atomo = get_ponto_e_virgula();
+
+    // Se identificar '.', átomo esperado é ponto
+    else if(*buffer == '.') info_atomo = get_ponto();
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -310,4 +328,18 @@ TInfoAtomo get_comentarioB() {
     q3: // Reconhecimento do átomo como comentário
     info_comentario.atomo = COMENTARIO;
     return info_comentario;
+}
+
+TInfoAtomo get_ponto_e_virgula() {
+    TInfoAtomo info_ponto_e_virgula;
+    info_ponto_e_virgula.atomo = PONTO_E_VIRGULA;
+    buffer++; // Consome ponto e vírgula
+    return info_ponto_e_virgula;
+}
+
+TInfoAtomo get_ponto() {
+    TInfoAtomo info_ponto;
+    info_ponto.atomo = PONTO;
+    buffer++; // Consome ponto e vírgula
+    return info_ponto;
 }

@@ -1,9 +1,11 @@
 program
-batata frita # reconhece ambos
+batata frita # reconhece ambos ;.
 0b11 # reconhece
+;.
 # teste
+.....
 and begin boolean elif end false for if integer 
-not of or program read set
+not of or program read set;
 to true write
 {-
 comentario de multiplas linhas
