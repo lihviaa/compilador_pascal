@@ -45,6 +45,9 @@ typedef enum {
     SUBTRACAO,
     MULTIPLICACAO,
     DIVISAO,
+    IGUAL,
+    MENOR,
+    MAIOR,
     EOS
 } TAtomo;
 
@@ -88,6 +91,9 @@ char* msgAtomo[] = {
     "SUBTRACAO",
     "MULTIPLICACAO",
     "DIVISAO",
+    "IGUAL",
+    "MENOR",
+    "MAIOR",
     "EOS"
 };
 
@@ -104,6 +110,9 @@ int conta_linha = 1;
 // Declaração de funções do analisador léxico
 TInfoAtomo get_atomo();
 TInfoAtomo get_ponto();
+TInfoAtomo get_igual();
+TInfoAtomo get_menor();
+TInfoAtomo get_maior();
 TInfoAtomo get_numero();
 TInfoAtomo get_adicao();
 TInfoAtomo get_virgula();
@@ -160,6 +169,15 @@ int main(int argc, char* argv[]) {
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo == DIVISAO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == IGUAL)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == MENOR)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == MAIOR)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
@@ -260,6 +278,15 @@ TInfoAtomo get_atomo() {
     
     // Se identificar '/', átomo esperado é divisão
     else if(*buffer == '/') info_atomo = get_divisao();
+    
+    // Se identificar '=', átomo esperado é igual
+    else if(*buffer == '=') info_atomo = get_igual();
+    
+    // Se identificar '<', átomo esperado é menor
+    else if(*buffer == '<') info_atomo = get_menor();
+    
+    // Se identificar '>', átomo esperado é maior
+    else if(*buffer == '>') info_atomo = get_maior();
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -470,4 +497,25 @@ TInfoAtomo get_divisao() {
     info_divisao.atomo = DIVISAO;
     buffer++; // Consome divisao
     return info_divisao;
+}
+
+TInfoAtomo get_igual() {
+    TInfoAtomo info_igual;
+    info_igual.atomo = IGUAL;
+    buffer++; // Consome igual
+    return info_igual;
+}
+
+TInfoAtomo get_menor() {
+    TInfoAtomo info_menor;
+    info_menor.atomo = MENOR;
+    buffer++; // Consome menor
+    return info_menor;
+}
+
+TInfoAtomo get_maior() {
+    TInfoAtomo info_maior;
+    info_maior.atomo = MAIOR;
+    buffer++; // Consome maior
+    return info_maior;
 }
