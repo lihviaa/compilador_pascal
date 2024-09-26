@@ -37,6 +37,8 @@ typedef enum {
     COMENTARIO,
     PONTO_E_VIRGULA,
     PONTO,
+    VIRGULA,
+    DOIS_PONTOS,
     EOS
 } TAtomo;
 
@@ -72,6 +74,8 @@ char* msgAtomo[] = {
     "COMENTARIO",
     "PONTO E VIRGULA",
     "PONTO",
+    "VIRGULA",
+    "DOIS PONTOS",
     "EOS"
 };
 
@@ -87,12 +91,14 @@ int conta_linha = 1;
 
 // Declaração de funções do analisador léxico
 TInfoAtomo get_atomo();
+TInfoAtomo get_ponto();
 TInfoAtomo get_numero();
+TInfoAtomo get_virgula();
 TInfoAtomo get_comentarioA();
 TInfoAtomo get_comentarioB();
+TInfoAtomo get_dois_pontos();
 TInfoAtomo get_identificador();
 TInfoAtomo get_ponto_e_virgula();
-TInfoAtomo get_ponto();
 
 // Declaração de função de leitura de arquivo para buffer
 void file_to_buffer(char* file_name);
@@ -112,6 +118,12 @@ int main(int argc, char* argv[]) {
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
         
         else if(info_atomo.atomo == PONTO)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == VIRGULA)
+            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+
+        else if(info_atomo.atomo == DOIS_PONTOS)
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
         else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
@@ -188,6 +200,12 @@ TInfoAtomo get_atomo() {
 
     // Se identificar '.', átomo esperado é ponto
     else if(*buffer == '.') info_atomo = get_ponto();
+    
+    // Se identificar ',', átomo esperado é vírgula
+    else if(*buffer == ',') info_atomo = get_virgula();
+    
+    // Se identificar ':', átomo esperado é dois pontos
+    else if(*buffer == ':') info_atomo = get_dois_pontos();
     
     // Se identificar terminador nulo, átomo esperado é fim do buffer (end of string)
     else if(*buffer == 0) info_atomo.atomo = EOS;
@@ -340,6 +358,20 @@ TInfoAtomo get_ponto_e_virgula() {
 TInfoAtomo get_ponto() {
     TInfoAtomo info_ponto;
     info_ponto.atomo = PONTO;
-    buffer++; // Consome ponto e vírgula
+    buffer++; // Consome ponto
     return info_ponto;
+}
+
+TInfoAtomo get_virgula() {
+    TInfoAtomo info_virgula;
+    info_virgula.atomo = VIRGULA;
+    buffer++; // Consome vírgula
+    return info_virgula;
+}
+
+TInfoAtomo get_dois_pontos() {
+    TInfoAtomo info_dois_pontos;
+    info_dois_pontos.atomo = DOIS_PONTOS;
+    buffer++; // Consome dois pontos
+    return info_dois_pontos;
 }
