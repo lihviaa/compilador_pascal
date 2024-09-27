@@ -13,8 +13,9 @@
 #include <string.h>
 
 typedef enum {
-    ERRO,
     IDENTIFICADOR,
+    NUMERO,
+    ERRO,
     AND,
     BEGIN,
     BOOLEAN,
@@ -33,7 +34,6 @@ typedef enum {
     TO,
     TRUE,
     WRITE,
-    NUMERO,
     COMENTARIO,
     PONTO_E_VIRGULA,
     PONTO,
@@ -62,8 +62,9 @@ typedef struct {
 } TInfoAtomo;
 
 char* msgAtomo[] = {
-    "ERRO",
     "IDENTIFICADOR",
+    "NUMERO",
+    "ERRO",
     "and",
     "begin",
     "boolean",
@@ -82,7 +83,6 @@ char* msgAtomo[] = {
     "to",
     "true",
     "write",
-    "NUMERO",
     "COMENTARIO",
     ";",
     ".",
@@ -150,65 +150,12 @@ int main(int argc, char* argv[]) {
         if(info_atomo.atomo == IDENTIFICADOR)
             printf("%03d# %s | %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_ID);
 
-        else if(info_atomo.atomo == PONTO_E_VIRGULA)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-        
-        else if(info_atomo.atomo == PONTO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == VIRGULA)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == DOIS_PONTOS)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == ABRE_PARENTESES)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == FECHA_PARENTESES)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == ADICAO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == SUBTRACAO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == MULTIPLICACAO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == DIVISAO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == IGUAL)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == DIFERENTE)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == MENOR)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == MENOR_OU_IGUAL)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == MAIOR)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo == MAIOR_OU_IGUAL)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-        else if(info_atomo.atomo > 1 && info_atomo.atomo < 20)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
         else if(info_atomo.atomo == NUMERO)
             printf("%03d# %s | %d\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_numero);
 
-        else if(info_atomo.atomo == COMENTARIO)
-            printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
         else
             printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+    
     } while(info_atomo.atomo != EOS && info_atomo.atomo != ERRO);
     
     return 0;
