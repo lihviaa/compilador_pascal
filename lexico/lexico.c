@@ -341,8 +341,8 @@ TInfoAtomo get_numero() {
     strncpy(binario, iniID, buffer - iniID); // Recorta o binário
     binario[buffer - iniID] = 0; // Finaliza a string
     
-    // Binário é armazenado como um INTEIRO, conforme definição em TInfoAtomo
-    info_numero.atributo_numero = atoi(binario); // atoi converte string para int
+    // Binário é armazenado como um DECIMAL INTEIRO, conforme definição em TInfoAtomo
+    info_numero.atributo_numero = strtol(binario, NULL, 2); // strtol para conversão direta em decimal
     info_numero.atomo = NUMERO; 
 
     return info_numero;

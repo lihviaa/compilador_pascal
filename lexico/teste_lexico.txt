@@ -1,6 +1,8 @@
 program
 batata frita # reconhece ambos 
 0b11 # reconhece
+0b1000 # 8
+0b0001 # 1
 # testando terminais ; . , : ( ) + - * / = < > /= <= >=
 batata/oi
 batata+oi
