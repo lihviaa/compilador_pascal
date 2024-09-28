@@ -1,6 +1,0 @@
-program teste;
-integer num_1, num_2, num_3;
-boolean bool_1, bool_2;
-begin
-end
-.

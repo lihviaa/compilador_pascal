@@ -4,7 +4,7 @@
     NOME: Pedro Henrique Araujo Farias      RA: 10265432
 
     Compile o programa com o seguinte comando:
-    gcc -g -Og -Wall compilador.c -o compilador
+    gcc -g -Og -Wall lexico_sintatico.c -o lexico_sintatico
 */
 
 #include <stdio.h>
@@ -84,22 +84,22 @@ char* msgAtomo[] = {
     "write",
     "NUMERO",
     "COMENTARIO",
-    ";",
-    ".",
-    ",",
-    ":",
-    "(",
-    ")",
-    "+",
-    "-",
-    "*",
-    "/",
-    "=",
-    "/=",
-    "<",
-    "<=",
-    ">",
-    ">=",
+    "ponto e virgula",
+    "ponto",
+    "virgula",
+    "dois pontos",
+    "abre parenteses",
+    "fecha parenteses",
+    "adicao",
+    "subtracao",
+    "multiplicacao",
+    "divisao",
+    "igual",
+    "diferente",
+    "menor",
+    "menor ou igual",
+    "maior",
+    "maior ou igual",
     "EOS"
 };
 
@@ -167,6 +167,8 @@ void file_to_buffer(char* file_name);
 
 int main(int argc, char* argv[]) {
     file_to_buffer(argv[1]);
+
+    printf("Iniciando analises lexica e sintatica do arquivo lido\n\n");
     
     info_atomo = get_atomo();
     lookahead = info_atomo.atomo;
@@ -174,7 +176,7 @@ int main(int argc, char* argv[]) {
     programa();
     consome(EOS);
 
-    printf("Linhas: %d - Sintaticamente correto\n", info_atomo.linha);
+    printf("\n%d linhas foram lidas.\nPrograma sintaticamente correto.\n", info_atomo.linha);
     
     return 0;
 }
@@ -360,7 +362,7 @@ TInfoAtomo get_numero() {
     binario[buffer - iniID] = 0; // Finaliza a string
     
     // Binário é armazenado como um INTEIRO, conforme definição em TInfoAtomo
-    info_numero.atributo_numero = atoi(binario); // atoi converte string para int
+    info_numero.atributo_numero = strtol(binario, NULL, 2); // strtol para conversão direta em decimal
     info_numero.atomo = NUMERO; 
 
     return info_numero;
@@ -534,24 +536,41 @@ TInfoAtomo get_maior_ou_igual() {
     return info_maior_ou_igual;
 }
 
+// Para tratar comentários fizemos uma gambiarra, mas está funcionando...
 void consome(TAtomo atomo) {
-    if(info_atomo.atomo == IDENTIFICADOR)
+    while(lookahead == COMENTARIO) { // Ignora o comentário
+        printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+        info_atomo = get_atomo();
+        lookahead = info_atomo.atomo;
+    }
+
+    if(atomo == IDENTIFICADOR)
         printf("%03d# %s | %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_ID);
 
-    else if(info_atomo.atomo == NUMERO)
+    else if(atomo == NUMERO)
         printf("%03d# %s | %d\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_numero);
 
     else
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
+    if(lookahead == ERRO) {
+        printf("\n%03d# Erro lexico identificado.\n", info_atomo.linha);
+        exit(0);
+    }
+
     if(lookahead == atomo) {
         info_atomo = get_atomo();
         lookahead = info_atomo.atomo;
-
     } else {
-        printf("%03d# Erro sintatico: Esperado [%s], encontrado [%s]\n", info_atomo.linha, msgAtomo[atomo], msgAtomo[lookahead]);
+        printf("\n%03d# Erro sintatico: Esperado [%s], encontrado [%s]\n", info_atomo.linha, msgAtomo[atomo], msgAtomo[lookahead]);
         exit(0);
     }
+
+    while (lookahead == COMENTARIO) { // Ignora o comentário
+        printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
+        info_atomo = get_atomo();
+        lookahead = info_atomo.atomo;
+    } 
 }
 
 // <programa> ::= "program" "identificador" ";" <bloco> "."

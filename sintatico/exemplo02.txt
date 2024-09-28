@@ -1,3 +1,6 @@
+{-
+programa le dois numeros inteiros e encontra o maior
+-}
 program exemplo2;
 integer num_1, num_2;
 integer maior;
@@ -9,5 +12,5 @@ set maior to num_1
 elif
 set maior to num_2;
 
-write(maior) 
+write(maior) # imprime o maior valor
 end.
