@@ -305,6 +305,8 @@ TInfoAtomo get_identificador() {
         goto q1;
     }
 
+    if(isupper(*buffer)) return info_identificador;
+
     // Condicional para rejeitar identificadores com mais de 15 caracteres
     if((buffer - iniID) > 15) return info_identificador;
     
@@ -538,6 +540,11 @@ TInfoAtomo get_maior_ou_igual() {
 
 // Para tratar comentários fizemos uma gambiarra, mas está funcionando...
 void consome(TAtomo atomo) {
+    if(lookahead == ERRO) {
+        printf("\n%03d# Erro lexico identificado.\n", info_atomo.linha);
+        exit(0);
+    }
+
     while(lookahead == COMENTARIO) { // Ignora o comentário
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
         info_atomo = get_atomo();
@@ -552,11 +559,6 @@ void consome(TAtomo atomo) {
 
     else
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
-
-    if(lookahead == ERRO) {
-        printf("\n%03d# Erro lexico identificado.\n", info_atomo.linha);
-        exit(0);
-    }
 
     if(lookahead == atomo) {
         info_atomo = get_atomo();
