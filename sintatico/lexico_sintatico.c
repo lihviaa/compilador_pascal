@@ -165,6 +165,7 @@ void declaracao_de_variaveis();
 // Declaração de função de leitura de arquivo para buffer
 void file_to_buffer(char* file_name);
 
+// Função principal =)
 int main(int argc, char* argv[]) {
     file_to_buffer(argv[1]);
 
@@ -681,7 +682,7 @@ void comando_condicional() {
     }
 }
 
-// <comando_repeticao> ::= "for" "identificador" "of" <expressao> to <expressao> ":" <comando>
+// <comando_repeticao> ::= "for" "identificador" "of" <expressao> "to" <expressao> ":" <comando>
 void comando_repeticao() {
     consome(FOR);
     consome(IDENTIFICADOR);
