@@ -4,7 +4,7 @@
     NOME: Pedro Henrique Araujo Farias      RA: 10265432
 
     Compile o programa com o seguinte comando:
-    gcc -g -Og -Wall lexico_sintatico.c -o lexico_sintatico
+    gcc -g -Og -Wall pascal+-.c -o pascal+-
 */
 
 #include <stdio.h>
@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum {
+// Definicao dos atomos reconhecidos pela gramatica
+typedef enum { 
     ERRO,
     IDENTIFICADOR,
     AND,
@@ -54,13 +55,15 @@ typedef enum {
     EOS
 } TAtomo;
 
-typedef struct {
+// Definicao de estrutura das informacoes de um atomo
+typedef struct { 
     TAtomo atomo;
     int linha;
-    int atributo_numero;
-    char atributo_ID[16];
+    int atributo_numero; // caso atomo seja NUMERO, armazena o numero 
+    char atributo_ID[16]; // caso atomo seja IDENTIFICADOR, armazena identificador
 } TInfoAtomo;
 
+// Array de strings para mensagens de acordo com o enderecamento a partir do atomo
 char* msgAtomo[] = {
     "ERRO",
     "IDENTIFICADOR",
@@ -103,17 +106,18 @@ char* msgAtomo[] = {
     "EOS"
 };
 
-// Vetor para identificação e atribuição correta em ENUM de palavras reservadas
+// Vetor para identificacao e atribuição correta em ENUM de palavras reservadas
 char* palavras_reservadas[] = {
     "and", "begin", "boolean", "elif", "end",
     "false", "for", "if", "integer", "not", "of",
     "or", "program", "read", "set", "to", "true", "write"
 };
 
+// Variaveis globais para analisador lexico
 char* buffer; // Buffer obtido a partir de leitura de arquivo
-int conta_linha = 1; 
+int conta_linha = 1; // Contador de linhas do programa
 
-// Declaração de funções do analisador léxico
+// Declaracao de funcoes do analisador lexico
 TInfoAtomo get_atomo();
 TInfoAtomo get_ponto();
 TInfoAtomo get_igual();
@@ -136,11 +140,11 @@ TInfoAtomo get_ponto_e_virgula();
 TInfoAtomo get_abre_parenteses();
 TInfoAtomo get_fecha_parenteses();
 
-// Variáveis globais do sintático
+// Variaveis globais do analisador sintatico
 TAtomo lookahead;
 TInfoAtomo info_atomo;
 
-// Declaração de funções do sintático
+// Declaracao de funcoes do analisador sintatico
 void tipo();
 void bloco();
 void fator();
@@ -158,18 +162,16 @@ void expressao_simples();
 void comando_repeticao();
 void comando_atribuicao();
 void comando_condicional();
-void consome(TAtomo atomo);
+void consome(TAtomo atomo); // Comunicacao com o analisador lexico
 void expressao_relacional();
 void declaracao_de_variaveis();
 
-// Declaração de função de leitura de arquivo para buffer
+// Declaracao de funcao de leitura de conteudo do arquivo para buffer
 void file_to_buffer(char* file_name);
 
-// Função principal =)
+// Funcao principal =)
 int main(int argc, char* argv[]) {
-    file_to_buffer(argv[1]);
-
-    printf("Iniciando analises lexica e sintatica do arquivo lido\n\n");
+    file_to_buffer(argv[1]); // Lê o arquivo informado em linha de comando
     
     info_atomo = get_atomo();
     lookahead = info_atomo.atomo;
@@ -182,9 +184,9 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-// Função de leitura do conteúdo de arquivo para uma string no buffer
-// Estratégia: ir até o final do arquivo, calcular número de bytes, alocar 
-// string de número de bytes + 1, copiar conteúdo, adicionar terminal nulo
+// Funcao de leitura do conteudo de arquivo para uma string em buffer
+// Estrategia: ir ate o final do arquivo, calcular numero de bytes, alocar 
+// string de numero de bytes + 1, copiar conteudo, adicionar terminador nulo
 void file_to_buffer(char* file_name) {
     FILE *pfile = fopen(file_name, "r");
     if(!pfile) {
@@ -210,11 +212,14 @@ void file_to_buffer(char* file_name) {
     fclose(pfile);
 }
 
+// ********** Definicao de funcoes do analisador lexico **********
+
+// Funcao do analisador lexico que obtem um atomo a partir do conteudo no buffer
 TInfoAtomo get_atomo() {
     TInfoAtomo info_atomo;
     info_atomo.atomo = ERRO;
 
-    // Ignora espaços, quebra de linha, tabulação
+    // Ignora espaços, quebra de linha, tabulacao, retorno de carro
     while(*buffer == ' ' || *buffer == '\n' ||
     *buffer == '\t' || *buffer == '\r') {
         if(*buffer == '\n') conta_linha++; // Se for quebra de linha, incrementa contador
@@ -300,12 +305,13 @@ TInfoAtomo get_identificador() {
     char* iniID = buffer;
     buffer++; // Primeira letra do identificador lida
 
-    q1:
+    q1: // Consome caracteres correspondentes a definicao de identificador
     if(islower(*buffer) || isdigit(*buffer) || *buffer == '_') {
         buffer++;
         goto q1;
     }
 
+    // Letras maiusculas nao sao reconhecidas 
     if(isupper(*buffer)) return info_identificador;
 
     // Condicional para rejeitar identificadores com mais de 15 caracteres
@@ -360,12 +366,12 @@ TInfoAtomo get_numero() {
     if(isalpha(*buffer) || *buffer == '_') return info_numero;
 
     char binario[999]; // Não se sabe tamanho do binário, então por via das dúvidas...
-    iniID += 2; // Recorte descarta 0b e armazena apenas o binário propriamente dito
+    iniID += 2; // Recorte descarta 0b 
     strncpy(binario, iniID, buffer - iniID); // Recorta o binário
     binario[buffer - iniID] = 0; // Finaliza a string
     
-    // Binário é armazenado como um INTEIRO, conforme definição em TInfoAtomo
-    info_numero.atributo_numero = strtol(binario, NULL, 2); // strtol para conversão direta em decimal
+    // Numero é armazenado como um INTEIRO, conforme definição em TInfoAtomo
+    info_numero.atributo_numero = strtol(binario, NULL, 2); // strtol para conversão direta em DECIMAL
     info_numero.atomo = NUMERO; 
 
     return info_numero;
@@ -427,80 +433,83 @@ TInfoAtomo get_comentarioB() {
     return info_comentario;
 }
 
+// A partir daqui temos algumas funcoes simples do analisador lexico, que consomem
+// o atomo indicado no nome da funcao... bem autoexplicativo.
+
 TInfoAtomo get_ponto_e_virgula() {
     TInfoAtomo info_ponto_e_virgula;
     info_ponto_e_virgula.atomo = PONTO_E_VIRGULA;
-    buffer++; // Consome ponto e vírgula
+    buffer++; // Consome ';'
     return info_ponto_e_virgula;
 }
 
 TInfoAtomo get_ponto() {
     TInfoAtomo info_ponto;
     info_ponto.atomo = PONTO;
-    buffer++; // Consome ponto
+    buffer++; // Consome '.'
     return info_ponto;
 }
 
 TInfoAtomo get_virgula() {
     TInfoAtomo info_virgula;
     info_virgula.atomo = VIRGULA;
-    buffer++; // Consome vírgula
+    buffer++; // Consome ','
     return info_virgula;
 }
 
 TInfoAtomo get_dois_pontos() {
     TInfoAtomo info_dois_pontos;
     info_dois_pontos.atomo = DOIS_PONTOS;
-    buffer++; // Consome dois pontos
+    buffer++; // Consome ':'
     return info_dois_pontos;
 }
 
 TInfoAtomo get_abre_parenteses() {
     TInfoAtomo info_abre_parenteses;
     info_abre_parenteses.atomo = ABRE_PARENTESES;
-    buffer++; // Consome abre parenteses
+    buffer++; // Consome '('
     return info_abre_parenteses;
 }
 
 TInfoAtomo get_fecha_parenteses() {
     TInfoAtomo info_fecha_parenteses;
     info_fecha_parenteses.atomo = FECHA_PARENTESES;
-    buffer++; // Consome fecha parenteses
+    buffer++; // Consome ')'
     return info_fecha_parenteses;
 }
 
 TInfoAtomo get_adicao() {
     TInfoAtomo info_adicao;
     info_adicao.atomo = ADICAO;
-    buffer++; // Consome adicao
+    buffer++; // Consome '+'
     return info_adicao;
 }
 
 TInfoAtomo get_subtracao() {
     TInfoAtomo info_subtracao;
     info_subtracao.atomo = SUBTRACAO;
-    buffer++; // Consome subtracao
+    buffer++; // Consome '-'
     return info_subtracao;
 }
 
 TInfoAtomo get_multiplicacao() {
     TInfoAtomo info_multiplicacao;
     info_multiplicacao.atomo = MULTIPLICACAO;
-    buffer++; // Consome multiplicacao
+    buffer++; // Consome '*'
     return info_multiplicacao;
 }
 
 TInfoAtomo get_divisao() {
     TInfoAtomo info_divisao;
     info_divisao.atomo = DIVISAO;
-    buffer++; // Consome divisao
+    buffer++; // Consome '/'
     return info_divisao;
 }
 
 TInfoAtomo get_igual() {
     TInfoAtomo info_igual;
     info_igual.atomo = IGUAL;
-    buffer++; // Consome igual
+    buffer++; // Consome '='
     return info_igual;
 }
 
@@ -514,7 +523,7 @@ TInfoAtomo get_diferente() {
 TInfoAtomo get_menor() {
     TInfoAtomo info_menor;
     info_menor.atomo = MENOR;
-    buffer++; // Consome menor
+    buffer++; // Consome '<'
     return info_menor;
 }
 
@@ -528,7 +537,7 @@ TInfoAtomo get_menor_ou_igual() {
 TInfoAtomo get_maior() {
     TInfoAtomo info_maior;
     info_maior.atomo = MAIOR;
-    buffer++; // Consome maior
+    buffer++; // Consome '>'
     return info_maior;
 }
 
@@ -539,14 +548,19 @@ TInfoAtomo get_maior_ou_igual() {
     return info_maior_ou_igual;
 }
 
-// Para tratar comentários fizemos uma gambiarra, mas está funcionando...
+// ********** Fim da definicao de funcoes do analisador lexico **********
+
+// ********** Definicao de funcoes do analisador sintatico **********
+
+// Funcao do analisador sintatico que solicita um atomo ao analisador lexico, integrando-os
 void consome(TAtomo atomo) {
-    if(lookahead == ERRO) {
+    if(lookahead == ERRO) { // Erro lexico e imediatamente reportado
         printf("\n%03d# Erro lexico identificado.\n", info_atomo.linha);
         exit(0);
     }
 
-    while(lookahead == COMENTARIO) { // Ignora o comentário
+    while(lookahead == COMENTARIO) { // Ignora atomo de comentario
+        // Antes de ignora-lo, reportamos o comentario
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
         info_atomo = get_atomo();
         lookahead = info_atomo.atomo;
@@ -558,23 +572,27 @@ void consome(TAtomo atomo) {
     else if(atomo == NUMERO)
         printf("%03d# %s | %d\n", info_atomo.linha, msgAtomo[info_atomo.atomo], info_atomo.atributo_numero);
 
-    else
+    else // Palavras reservadas, outros atomos sem conteudo em atributo_ID ou atributo_numero
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
 
-    if(lookahead == atomo) {
+    if(lookahead == atomo) { // Obtem proximo lookahead
         info_atomo = get_atomo();
         lookahead = info_atomo.atomo;
-    } else {
+    } else { // Caso atomo nao corresponda ao esperado na sintaxe, reporta erro sintatico
         printf("\n%03d# Erro sintatico: Esperado [%s], encontrado [%s]\n", info_atomo.linha, msgAtomo[atomo], msgAtomo[lookahead]);
         exit(0);
     }
 
-    while (lookahead == COMENTARIO) { // Ignora o comentário
+    // Pra ser sincero, nao sabemos ao certo o motivo de precisar verificar se e
+    // comentario no final tambem, mas so funciona corretamente assim. 
+    while(lookahead == COMENTARIO) { 
         printf("%03d# %s\n", info_atomo.linha, msgAtomo[info_atomo.atomo]);
         info_atomo = get_atomo();
         lookahead = info_atomo.atomo;
-    } 
+    } // Ficou meio gambiarra, mas esta funcionando. 
 }
+
+// Funcoes do analisador sintatico para regras de producao da sintaxe
 
 // <programa> ::= "program" "identificador" ";" <bloco> "."
 void programa() {
@@ -799,7 +817,7 @@ void termo() {
 }
 
 // <fator> ::= "(" <expressao> ")" | "not" <fator> |
-//             "identificador" | "numero" | "true" | "false"
+//             "identificador" | "numero" | "false" | "true"
 void fator() {
     switch(lookahead) {
     
@@ -813,8 +831,22 @@ void fator() {
         consome(NOT);
         fator();
     
+    case NUMERO:
+        consome(NUMERO);
+        break;
+
+    case IDENTIFICADOR:
+        consome(IDENTIFICADOR);
+        break;
+    
+    case FALSE:
+        consome(FALSE);
+        break;
+        
     default:
-        consome(lookahead);
+        consome(TRUE);
         break;
     }
 }
+
+// ********** Fim da definicao de funcoes do analisador sintatico **********
