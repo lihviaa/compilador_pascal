@@ -4,7 +4,7 @@
     NOME: Pedro Henrique Araujo Farias      RA: 10265432
 
     Compile o programa com o seguinte comando:
-    gcc -g -Og -Wall pascal+-.c -o pascal+-
+    gcc -g -Og -Wall semantico.c -o semantico
 */
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define MAX_SIZE_ARRAY 100
-#define MAX_SIZE_STRING 20
+#define MAX_SIZE_STRING 16
 
 // Definicao dos atomos reconhecidos pela gramatica
 typedef enum { 
@@ -180,8 +180,11 @@ void adicionar_tabela_simbolos(char* simbolo);
 void excessao_nao_declarada(char* nao_declarada);
 
 // Variaveis globais para geracao de codigo MEPA
-int numero_id;
-char simbolo_id[16];
+int num_variaveis_declaradas = 0;
+int rotulo_atual = 1;
+
+// Declaracao de funcoes para geracao de codigo MEPA
+int proximo_rotulo();
 
 // Declaracao de funcao de leitura de conteudo do arquivo para buffer
 void file_to_buffer(char* file_name);
@@ -196,11 +199,9 @@ int main(int argc, char* argv[]) {
     programa();
     consome(EOS);
 
-    printf("\n%d linhas foram lidas.\nPrograma sintaticamente correto.\n", info_atomo.linha);
-
     printf("\nTabela de simbolos\n");
     exibir_tabela_simbolos();
-    
+
     return 0;
 }
 
@@ -607,8 +608,10 @@ void programa() {
     consome(PROGRAM);
     consome(IDENTIFICADOR);
     consome(PONTO_E_VIRGULA);
+    printf("\tINPP\n");
     bloco();
     consome(PONTO);
+    printf("\tPARA\n");
 }
 
 // <bloco> ::= <declaracao_de_variaveis> <comando_composto>
@@ -626,6 +629,8 @@ void declaracao_de_variaveis() {
         flag_declaracao_variaveis = 0;
         consome(PONTO_E_VIRGULA);
     }
+
+    printf("\tAMEM %d\n", num_variaveis_declaradas);
 }
 
 // <tipo> ::= "integer" | "boolean"
@@ -636,14 +641,18 @@ void tipo() {
 
 // <lista_variavel> ::= "identificador" { "," "identificador" }
 void lista_variavel() {
+    char simbolo_id[16];
     strcpy(simbolo_id, info_atomo.atributo_ID);
     consome(IDENTIFICADOR);
     
-    if(flag_declaracao_variaveis) adicionar_tabela_simbolos(simbolo_id);
-    else {
+    if(flag_declaracao_variaveis) {
+        adicionar_tabela_simbolos(simbolo_id);
+        num_variaveis_declaradas++;
+    } else {
         int endereco = buscar_tabela_simbolos(simbolo_id);
         if(endereco == -1) excessao_nao_declarada(simbolo_id);
-        printf("CRVL %d\n", endereco);
+        printf("\tLEIT\n");
+        printf("\tARMZ %d\n", endereco);
     }
 
     while(lookahead == VIRGULA) {
@@ -652,11 +661,14 @@ void lista_variavel() {
         strcpy(simbolo_id, info_atomo.atributo_ID);
         consome(IDENTIFICADOR);
     
-        if(flag_declaracao_variaveis) adicionar_tabela_simbolos(simbolo_id);
-        else {
+        if(flag_declaracao_variaveis) {
+            adicionar_tabela_simbolos(simbolo_id);
+            num_variaveis_declaradas++;
+        } else {
             int endereco = buscar_tabela_simbolos(simbolo_id);
             if(endereco == -1) excessao_nao_declarada(simbolo_id);
-            printf("CRVL %d\n", endereco);
+            printf("\tLEIT\n");
+            printf("\tARMZ %d\n", endereco);
         }
     }
 }
@@ -709,34 +721,57 @@ void comando() {
 // <comando_atribuicao> ::= "set" "identificador" "to" <expressao>
 void comando_atribuicao() {
     consome(SET);
+    char simbolo_id[16];
+    strcpy(simbolo_id, info_atomo.atributo_ID);
     consome(IDENTIFICADOR);
     consome(TO);
     expressao();
+    int endereco = buscar_tabela_simbolos(simbolo_id);
+    printf("\tARMZ %d\n", endereco);
 }
 
 // <comando_condicional> ::= "if" <expressao> ":" <comando> [ "elif" <comando> ]
 void comando_condicional() {
+    int L1 = proximo_rotulo();
+    int L2 = proximo_rotulo();
     consome(IF);
     expressao();
     consome(DOIS_PONTOS);
+    printf("\tDSVF L%d\n", L1);
     comando();
-    
+    printf("\tDSVS L%d\n", L2);
+    printf("L%d: \tNADA\n", L1);
     if(lookahead == ELIF) {
         consome(ELIF);
         comando();
     }
+    printf("L%d: \tNADA\n", L2);
 }
 
 // <comando_repeticao> ::= "for" "identificador" "of" <expressao> "to" <expressao> ":" <comando>
 void comando_repeticao() {
+    int L1 = proximo_rotulo();
+    int L2 = proximo_rotulo();
     consome(FOR);
+    int endereco = buscar_tabela_simbolos(info_atomo.atributo_ID);
     consome(IDENTIFICADOR);
     consome(OF);
     expressao();
+    printf("\tARMZ %d\n", endereco);
+    printf("L%d: \tNADA\n", L1);
     consome(TO);
+    printf("\tCRVL %d\n", endereco);
     expressao();
+    printf("\tCMEG\n");
+    printf("\tDSVF L%d\n", L2);
     consome(DOIS_PONTOS);
     comando();
+    printf("\tCRVL %d\n", endereco);
+    printf("\tCRCT 1\n");
+    printf("\tSOMA\n");
+    printf("\tARMZ %d\n", endereco);
+    printf("\tDSVS L%d\n", L1);
+    printf("L%d: \tNADA\n", L2);
 }
 
 // <comando_entrada> ::= "read" "(" <lista_variavel> ")"
@@ -752,10 +787,12 @@ void comando_saida() {
     consome(WRITE);
     consome(ABRE_PARENTESES);
     expressao();
+    printf("\tIMPR\n");
 
     while(lookahead == VIRGULA) {
         consome(VIRGULA);
         expressao();
+        printf("\tIMPR\n");
     }
 
     consome(FECHA_PARENTESES);
@@ -788,9 +825,16 @@ void expressao_relacional() {
     if(lookahead == MENOR || lookahead == MENOR_OU_IGUAL ||
        lookahead == MAIOR || lookahead == MAIOR_OU_IGUAL ||
        lookahead == IGUAL || lookahead == DIFERENTE) {
+        TAtomo operador = lookahead;
         op_relacional();
         expressao_simples();
-       }
+        if(operador == MENOR) printf("\tCMME\n");
+        else if(operador == MENOR_OU_IGUAL) printf("\tCMEG\n");
+        else if(operador == MAIOR) printf("\tCMMA\n");
+        else if(operador == MAIOR_OU_IGUAL) printf("\tCMAG\n");
+        else if(operador == IGUAL) printf("\tCMIG\n");
+        else printf("\tCMDG\n"); 
+    }
 }
 
 // <op_relacional> ::= "<" | "<=" | "=" | "/=" | ">" | ">="
@@ -828,8 +872,11 @@ void expressao_simples() {
     termo();
 
     while(lookahead == ADICAO || lookahead == SUBTRACAO) {
+        TAtomo operador = lookahead;
         consome(lookahead);
         termo();
+        if(operador == ADICAO) printf("\tSOMA\n");
+        else printf("\tSUBT\n");
     }
 }
 
@@ -838,44 +885,38 @@ void termo() {
     fator();
 
     while(lookahead == MULTIPLICACAO || lookahead == DIVISAO) {
+        TAtomo operador = lookahead;
         consome(lookahead);
         fator();
+        if(operador == MULTIPLICACAO) printf("\tMULT\n");
+        else printf("\tDIVI\n");
     }
 }
 
-// <fator> ::= "(" <expressao> ")" | "not" <fator> |
-//             "identificador" | "numero" | "false" | "true"
+// Regra de producao alterada para analise semantica e geracao de codigo MEPA
+// <fator> ::= "identificador" | "numero" | "(" <expressao> ")"
 void fator() {
     switch(lookahead) {
     
-    case ABRE_PARENTESES:
-        consome(ABRE_PARENTESES);
-        expressao();
-        consome(FECHA_PARENTESES);
-        break;
-    
-    case NOT:
-        consome(NOT);
-        fator();
-    
     case NUMERO:
-        numero_id = info_atomo.atributo_numero;
+        int numero_id = info_atomo.atributo_numero;
         consome(NUMERO);
-        printf("CRCT %d\n", numero_id);
+        printf("\tCRCT %d\n", numero_id);
         break;
 
     case IDENTIFICADOR:
+        char simbolo_id[16];
         strcpy(simbolo_id, info_atomo.atributo_ID);
         consome(IDENTIFICADOR);
-        printf("CRVL %d\n", buscar_tabela_simbolos(simbolo_id));
-        break;
-    
-    case FALSE:
-        consome(FALSE);
+        int endereco = buscar_tabela_simbolos(simbolo_id);
+        if(endereco == -1) excessao_nao_declarada(simbolo_id);
+        printf("\tCRVL %d\n", endereco);
         break;
         
     default:
-        consome(TRUE);
+        consome(ABRE_PARENTESES);
+        expressao();
+        consome(FECHA_PARENTESES);
         break;
     }
 }
@@ -883,6 +924,7 @@ void fator() {
 // ********** Fim da definicao de funcoes do analisador sintatico **********
 
 // ********** Definicao de funcoes do analisador semantico **********
+
 int buscar_tabela_simbolos(char* simbolo) {
     for(int i = 0; i < num_simbolos; i++) {
         if(strcmp(tabela_simbolos[i], simbolo) == 0) return i;
@@ -903,7 +945,7 @@ void adicionar_tabela_simbolos(char* simbolo) {
 
 void exibir_tabela_simbolos() {
     for(int i = 0; i < num_simbolos; i++) {
-        printf("Simbolos[%02d]: %s\n", i, tabela_simbolos[i]);
+        printf("[%02d]:\t%s\n", i, tabela_simbolos[i]);
     }
 }
 
@@ -911,3 +953,15 @@ void excessao_nao_declarada(char* nao_declarada) {
     printf("\n%03d# Erro semantico: Variavel %s nao declarada\n", info_atomo.linha, nao_declarada);
     exit(0);
 }
+
+// ********** Fim da definicao de funcoes do analisador semantico **********
+
+// ********** Definicao de funcoes para geracao de codigo MEPA **********
+
+int proximo_rotulo() {
+    int rotulo = rotulo_atual;
+    rotulo_atual++;
+    return rotulo;
+}
+
+// ********** Fim da definicao de funcoes do analisador semantico **********
