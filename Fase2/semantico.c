@@ -652,7 +652,7 @@ void lista_variavel() {
         int endereco = buscar_tabela_simbolos(simbolo_id);
         if(endereco == -1) excessao_nao_declarada(simbolo_id);
         printf("\tLEIT\n");
-        printf("\tARMZ %d\n", endereco);
+        printf("\tARMZ %02d\n", endereco);
     }
 
     while(lookahead == VIRGULA) {
@@ -668,7 +668,7 @@ void lista_variavel() {
             int endereco = buscar_tabela_simbolos(simbolo_id);
             if(endereco == -1) excessao_nao_declarada(simbolo_id);
             printf("\tLEIT\n");
-            printf("\tARMZ %d\n", endereco);
+            printf("\tARMZ %02d\n", endereco);
         }
     }
 }
@@ -727,7 +727,7 @@ void comando_atribuicao() {
     consome(TO);
     expressao();
     int endereco = buscar_tabela_simbolos(simbolo_id);
-    printf("\tARMZ %d\n", endereco);
+    printf("\tARMZ %02d\n", endereco);
 }
 
 // <comando_condicional> ::= "if" <expressao> ":" <comando> [ "elif" <comando> ]
@@ -757,19 +757,19 @@ void comando_repeticao() {
     consome(IDENTIFICADOR);
     consome(OF);
     expressao();
-    printf("\tARMZ %d\n", endereco);
+    printf("\tARMZ %02d\n", endereco);
     printf("L%d: \tNADA\n", L1);
     consome(TO);
-    printf("\tCRVL %d\n", endereco);
+    printf("\tCRVL %02d\n", endereco);
     expressao();
     printf("\tCMEG\n");
     printf("\tDSVF L%d\n", L2);
     consome(DOIS_PONTOS);
     comando();
-    printf("\tCRVL %d\n", endereco);
+    printf("\tCRVL %02d\n", endereco);
     printf("\tCRCT 1\n");
     printf("\tSOMA\n");
-    printf("\tARMZ %d\n", endereco);
+    printf("\tARMZ %02d\n", endereco);
     printf("\tDSVS L%d\n", L1);
     printf("L%d: \tNADA\n", L2);
 }
@@ -910,7 +910,7 @@ void fator() {
         consome(IDENTIFICADOR);
         int endereco = buscar_tabela_simbolos(simbolo_id);
         if(endereco == -1) excessao_nao_declarada(simbolo_id);
-        printf("\tCRVL %d\n", endereco);
+        printf("\tCRVL %02d\n", endereco);
         break;
         
     default:
