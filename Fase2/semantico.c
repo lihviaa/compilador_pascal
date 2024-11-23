@@ -727,6 +727,7 @@ void comando_atribuicao() {
     consome(TO);
     expressao();
     int endereco = buscar_tabela_simbolos(simbolo_id);
+    if(endereco == -1) excessao_nao_declarada(simbolo_id);
     printf("\tARMZ %02d\n", endereco);
 }
 
