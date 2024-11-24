@@ -4,7 +4,7 @@
     NOME: Pedro Henrique Araujo Farias      RA: 10265432
 
     Compile o programa com o seguinte comando:
-    gcc -g -Og -Wall semantico.c -o semantico
+    gcc -g -Og -Wall pascal+-.c -o pascal+-
 */
 
 #include <stdio.h>
