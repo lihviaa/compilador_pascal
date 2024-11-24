@@ -1025,8 +1025,8 @@ void expressao_simples() {
 /*
  Tradução MEPA:
 
-        <Tradução de <termo 1>> 
-        <Tradução de <termo 2>> 
+        <Tradução de <fator 1>> 
+        <Tradução de <fator 2>> 
         <Operação de multiplicação (MULT) ou divisão (DIVI)> ; 
 */
 void termo() {
