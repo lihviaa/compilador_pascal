@@ -604,6 +604,19 @@ void consome(TAtomo atomo) {
 // Funcoes do analisador sintatico para regras de producao da sintaxe
 
 // <programa> ::= "program" "identificador" ";" <bloco> "."
+/*
+    Estrutura geral em MEPA:
+
+    program <identificador>;
+    <bloco>
+    .
+
+    Tradução MEPA:
+
+        INPP
+        <Tradução do bloco>
+        PARA
+*/
 void programa() {
     consome(PROGRAM);
     consome(IDENTIFICADOR);
@@ -621,6 +634,11 @@ void bloco() {
 }
 
 // <declaracao_de_variaveis> ::= { <tipo> <lista_variavel> ";" }
+/*
+   Tradução MEPA:
+
+        AMEM n  ; Número de variáveis declaradas
+*/
 void declaracao_de_variaveis() {
     while(lookahead == INTEGER || lookahead == BOOLEAN) {
         tipo();
@@ -640,6 +658,30 @@ void tipo() {
 }
 
 // <lista_variavel> ::= "identificador" { "," "identificador" }
+/*
+    Estrutura geral em MEPA:
+
+    Cenário 1: Declaração de variáveis (flag_declaracao_variaveis = 1)
+    --------------------------------------------------------------
+    - Os identificadores são apenas adicionados à tabela de símbolos.
+    - Não há instruções MEPA geradas neste momento.
+
+    Cenário 2: Uso de variáveis (flag_declaracao_variaveis = 0)
+    --------------------------------------------------------------
+    - Para cada identificador na lista, as seguintes instruções são geradas:
+        LEIT
+        ARMZ n
+    
+    Exemplo de entrada:
+        read(x);
+        read(y)
+        
+    Exemplo de tradução MEPA:
+        LEIT         
+        ARMZ 01      
+        LEIT         
+        ARMZ 02     
+*/
 void lista_variavel() {
     char simbolo_id[16];
     strcpy(simbolo_id, info_atomo.atributo_ID);
@@ -719,6 +761,26 @@ void comando() {
 }
 
 // <comando_atribuicao> ::= "set" "identificador" "to" <expressao>
+/*
+    Tradução MEPA:
+
+        <Tradução de <expressao>>  
+        ARMZ n
+
+    Exemplo de entrada:
+        set x to a + b
+
+        Tabela de simbolos
+            [00]:   a
+            [01]:   b
+            [02]:   x
+
+    Exemplo de tradução MEPA:
+        CRVL 00
+        CRVL 01   
+        SOMA          
+        ARMZ 02 
+*/
 void comando_atribuicao() {
     consome(SET);
     char simbolo_id[16];
@@ -732,6 +794,24 @@ void comando_atribuicao() {
 }
 
 // <comando_condicional> ::= "if" <expressao> ":" <comando> [ "elif" <comando> ]
+/*
+    Estrutura geral em MEPA:
+
+    if <expressao> :
+        <comando 1> 
+    [elif 
+        <comando 2>]
+
+    Tradução MEPA:
+
+        <Tradução de <expressao>       
+        DSVF L1              
+        <Tradução de <comando 1>>     
+        DSVS L2              
+    L1: NADA                 
+        <Tradução de <comando 2>>     
+    L2: NADA                 
+*/
 void comando_condicional() {
     int L1 = proximo_rotulo();
     int L2 = proximo_rotulo();
@@ -750,6 +830,30 @@ void comando_condicional() {
 }
 
 // <comando_repeticao> ::= "for" "identificador" "of" <expressao> "to" <expressao> ":" <comando>
+/*
+    Estrutura geral do comando "for" traduzido para MEPA:
+
+    Entrada:
+        for <identificador> of <expressao 1> to <expressao 2>:
+            <comando>
+
+    Tradução MEPA:
+
+        <Tradução da <expressao 1>>
+        ARMZ n                          ; Armazena o valor de <expressao> na variável <identificador>
+    L1: NADA
+        CRVL n                          ; Carrega o valor atual de <identificador>
+        <Tradução da <expressao 2>>
+        CMEG
+        DSVF L2
+        <Tradução do <comando>>
+        CRVL n                          ; Carrega o valor atual de <identificador>
+        CRCT 1
+        SOMA
+        ARMZ n                          ; Armazena o novo valor de <identificador>
+        DSVS L1
+    L2: NADA
+*/
 void comando_repeticao() {
     int L1 = proximo_rotulo();
     int L2 = proximo_rotulo();
@@ -784,6 +888,19 @@ void comando_entrada() {
 }
 
 // <comando_saida> ::= "write" "(" <expressao> { "," <expressao> } ")"
+/*
+    Estrutura geral de MEPA:
+
+        write ( <expressao 1> , <expressao 2>, ..., <expressao n> )
+
+    Tradução MEPA:
+
+        <Tradução de <expressao 1>> 
+        IMPR             
+        <Tradução de <expressao 2>> 
+        IMPR            
+        ...             
+*/
 void comando_saida() {
     consome(WRITE);
     consome(ABRE_PARENTESES);
@@ -820,6 +937,22 @@ void expressao_logica() {
 }
 
 // <expressao_relacional> ::= <expressao_simples> [ <op_relacional> <expressao_simples> ]
+/*
+    Estrutura geral da MEPA :
+
+        <expressao 1> <op_relacional> <expressao 2>
+
+    Tradução MEPA:
+
+        <Tradução de <expressao 1>> 
+        <Tradução de <expressao 2>>
+        <Tradução de op_relacional> ; Traduz o operador relacional: - CMME (<) 
+                                                                    - CMMA (<)
+                                                                    - CMEG (<=)
+                                                                    - CMAG (>=)
+                                                                    - CMIG (==)
+                                                                    - CMDG (/=).
+*/
 void expressao_relacional() {
     expressao_simples();
 
@@ -869,6 +1002,13 @@ void op_relacional() {
 }
 
 // <expressao_simples> ::= <termo> { ("+" | "-") <termo> }
+/*
+ Tradução MEPA:
+
+        <Tradução de <termo 1>> 
+        <Tradução de <termo 2>> 
+        <Operação de soma (SOMA) ou subtração (SUBT)> ; 
+*/
 void expressao_simples() {
     termo();
 
@@ -882,6 +1022,13 @@ void expressao_simples() {
 }
 
 // <termo> ::= <fator> { ("*" | "/") <fator> }
+/*
+ Tradução MEPA:
+
+        <Tradução de <termo 1>> 
+        <Tradução de <termo 2>> 
+        <Operação de multiplicação (MULT) ou divisão (DIVI)> ; 
+*/
 void termo() {
     fator();
 
@@ -896,6 +1043,19 @@ void termo() {
 
 // Regra de producao alterada para analise semantica e geracao de codigo MEPA
 // <fator> ::= "identificador" | "numero" | "(" <expressao> ")"
+/*
+ Tradução MEPA:
+
+    - Se for um número:
+        - CRCT <valor>
+        
+    - Se for um identificador:
+        - CRVL <endereço>
+        
+    - Se for uma expressão entre parênteses:
+        - Tradução da expressão entre parênteses.
+*/
+
 void fator() {
     switch(lookahead) {
     
@@ -926,6 +1086,9 @@ void fator() {
 
 // ********** Definicao de funcoes do analisador semantico **********
 
+// Função para buscar um símbolo na tabela de símbolos
+// Recebe como parâmetro o identificador do símbolo (variável) e retorna o índice onde ele foi encontrado
+// Retorna -1 caso o símbolo não seja encontrado
 int buscar_tabela_simbolos(char* simbolo) {
     for(int i = 0; i < num_simbolos; i++) {
         if(strcmp(tabela_simbolos[i], simbolo) == 0) return i;
@@ -934,6 +1097,8 @@ int buscar_tabela_simbolos(char* simbolo) {
     return -1;
 }
 
+// Função para adicionar um símbolo na tabela de símbolos
+// Verifica se o símbolo já foi declarado, e se não foi, o adiciona. Caso contrário, emite um erro semântico
 void adicionar_tabela_simbolos(char* simbolo) {
     if(buscar_tabela_simbolos(simbolo) == -1) {
         strcpy(tabela_simbolos[num_simbolos], simbolo);
@@ -944,12 +1109,16 @@ void adicionar_tabela_simbolos(char* simbolo) {
     }
 }
 
+// Função para exibir a tabela de símbolos
+// Lista os símbolos armazenados na tabela com seus respectivos índices
 void exibir_tabela_simbolos() {
     for(int i = 0; i < num_simbolos; i++) {
         printf("[%02d]:\t%s\n", i, tabela_simbolos[i]);
     }
 }
 
+// Função para tratar o erro de uso de variável não declarada
+// Recebe o nome da variável não declarada e emite um erro semântico
 void excessao_nao_declarada(char* nao_declarada) {
     printf("\n%03d# Erro semantico: Variavel %s nao declarada\n", info_atomo.linha, nao_declarada);
     exit(0);
