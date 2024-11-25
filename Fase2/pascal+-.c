@@ -678,9 +678,9 @@ void tipo() {
         
     Exemplo de tradução MEPA:
         LEIT         
-        ARMZ 01      
+        ARMZ 00      
         LEIT         
-        ARMZ 02     
+        ARMZ 01     
 */
 void lista_variavel() {
     char simbolo_id[16];
@@ -858,7 +858,10 @@ void comando_repeticao() {
     int L1 = proximo_rotulo();
     int L2 = proximo_rotulo();
     consome(FOR);
-    int endereco = buscar_tabela_simbolos(info_atomo.atributo_ID);
+    char simbolo_id[16];
+    strcpy(simbolo_id, info_atomo.atributo_ID);
+    int endereco = buscar_tabela_simbolos(simbolo_id);
+    if(endereco == -1) excessao_nao_declarada(simbolo_id);
     consome(IDENTIFICADOR);
     consome(OF);
     expressao();
@@ -1075,6 +1078,18 @@ void fator() {
         if(endereco == -1) excessao_nao_declarada(simbolo_id);
         printf("\tCRVL %02d\n", endereco);
         break;
+
+    case FALSE:
+        consome(FALSE);
+        break;
+    
+    case TRUE:
+        consome(TRUE);
+        break;
+    
+    case NOT:
+        consome(NOT);
+        break;
         
     default:
         consome(ABRE_PARENTESES);
@@ -1130,6 +1145,7 @@ void excessao_nao_declarada(char* nao_declarada) {
 
 // ********** Definicao de funcoes para geracao de codigo MEPA **********
 
+// Função para obter valor do próximo rótulo consecutivo positivo
 int proximo_rotulo() {
     int rotulo = rotulo_atual;
     rotulo_atual++;
