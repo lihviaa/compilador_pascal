@@ -923,6 +923,7 @@ void expressao() {
     while(lookahead == OR) {
         consome(OR);
         expressao_logica();
+        printf("\tDISJ\n");
     }
 }
 
@@ -933,6 +934,7 @@ void expressao_logica() {
     while(lookahead == AND) {
         consome(AND);
         expressao_relacional();
+        printf("\tCONJ\n");
     }
 }
 
